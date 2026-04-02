@@ -10,7 +10,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0f1c2c}
 body{display:flex;flex-direction:column;align-items:center;justify:center;font-family:Arial;color:#fff}
 #status{position:fixed;top:10px;left:10px;right:10px;text-align:center;font-size:16px;z-index:10}
 #game{display:block;width:100vw;height:100vh;touch-action:none}
-#restartBtn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 30px;font-size:18px;background:#ffaa00;border:none;border-radius:10px;z-index:20;display:none}
+#restartBtn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 30px;font-size:40px;background:#ffaa00;border:none;border-radius:10px;z-index:20;display:none}
 #restartBtn.show{display:block}
 #startScreen{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;flex-direction:column;align-items:center;justify:center;z-index:999}
 #startBtn{padding:16px 40px;font-size:22px;background:#ffaa00;border:none;border-radius:12px}
@@ -21,7 +21,7 @@ body{display:flex;flex-direction:column;align-items:center;justify:center;font-f
   position:fixed;
   left: 30%;
   transform: translateX(-50%);
-  bottom: 30vh;    /* 屏幕高度 下1/3 */
+  bottom: 20vh;    /* 屏幕高度 下1/3 */
   width: 30vw;  /* 直径 = 屏幕宽度 1/5 */
   height: 30vw;
   background:rgba(255,255,255,0.2);
@@ -67,11 +67,11 @@ const levelData=[
   {name:"乌龟",level:3,emoji:"🐢",baseSize:60,speed:4.0},
   {name:"金鱼",level:4,emoji:"🐠",baseSize:65,speed:4.8},
   {name:"鲤鱼",level:5,emoji:"🐟",baseSize:70,speed:5.0},
-  {name:"电鳗",level:6,emoji:"🐍",baseSize:75,speed:5.2},
-  {name:"鲨鱼",level:7,emoji:"🦈",baseSize:80,speed:5.4},
-  {name:"鲸鱼",level:8,emoji:"🐳",baseSize:85,speed:5.2},
-  {name:"蛟龙",level:9,emoji:"🐉",baseSize:90,speed:5.6},
-  {name:"神龙",level:10,emoji:"🐲",baseSize:100,speed:6.0}
+  {name:"电鳗",level:6,emoji:"🐍",baseSize:80,speed:5.2},
+  {name:"鲨鱼",level:7,emoji:"🦈",baseSize:90,speed:5.4},
+  {name:"鲸鱼",level:8,emoji:"🐳",baseSize:100,speed:5.2},
+  {name:"蛟龙",level:9,emoji:"🐉",baseSize:115,speed:5.6},
+  {name:"神龙",level:10,emoji:"🐲",baseSize:130,speed:6.0}
 ];
 
 let game;
@@ -239,8 +239,8 @@ function update(){
   const pi=levelData[p.level-1];
   
   // 你要的灵敏度：0.5
-  p.x += moveX * 2.5;
-  p.y += moveY * 2.5;
+  p.x += moveX * 2.7;
+  p.y += moveY * 2.7;
   
   const r=pi.baseSize/2;
   p.x=Math.max(r,Math.min(canvas.width-r,p.x));
