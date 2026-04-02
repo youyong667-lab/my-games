@@ -239,8 +239,8 @@ function update(){
   const pi=levelData[p.level-1];
   
   // 你要的灵敏度：0.5
-  p.x += moveX * 0.7;
-  p.y += moveY * 0.7;
+  p.x += moveX * 1;
+  p.y += moveY * 1;
   
   const r=pi.baseSize/2;
   p.x=Math.max(r,Math.min(canvas.width-r,p.x));
