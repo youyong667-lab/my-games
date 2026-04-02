@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>召唤神龙 · 手机摇杆全屏版</title>
+<title>召唤神龙 · 手机完美版</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:#0f1c2c}
@@ -16,9 +16,25 @@ body{display:flex;flex-direction:column;align-items:center;justify:center;font-f
 #startBtn{padding:16px 40px;font-size:22px;background:#ffaa00;border:none;border-radius:12px}
 #startScreen.hidden{display:none}
 
-/* 虚拟摇杆 */
-.joystick{position:fixed;left:30px;bottom:30px;width:100px;height:100px;background:rgba(255,255,255,0.2);border-radius:50%;z-index:50}
-.joystick_dot{position:absolute;left:50%;top:50%;width:40px;height:40px;background:rgba(255,255,255,0.6);border-radius:50%;transform:translate(-50%,-50%)}
+/* 虚拟摇杆 —— 你要的位置 + 大小 */
+.joystick{
+  position:fixed;
+  left: 30px;
+  bottom: 33vh;    /* 距离底部 1/3 屏幕高度 */
+  width: 6.66vw;   /* 屏幕 1/15 大小 */
+  height: 6.66vw;
+  background:rgba(255,255,255,0.2);
+  border-radius:50%;
+  z-index:50;
+}
+.joystick_dot{
+  position:absolute;
+  left:50%;top:50%;
+  width:40%;height:40%;
+  background:rgba(255,255,255,0.6);
+  border-radius:50%;
+  transform:translate(-50%,-50%)
+}
 </style>
 </head>
 
@@ -37,7 +53,6 @@ const restartBtn=document.getElementById("restartBtn");
 const startScreen=document.getElementById("startScreen");
 const startBtn=document.getElementById("startBtn");
 
-// 全屏画布
 function resizeCanvas(){
   canvas.width=document.documentElement.clientWidth;
   canvas.height=document.documentElement.clientHeight;
@@ -45,7 +60,6 @@ function resizeCanvas(){
 window.addEventListener("resize",resizeCanvas);
 resizeCanvas();
 
-// 等级配置
 const levelData=[
   {name:"蝌蚪",level:1,emoji:"🐛",baseSize:24,speed:4.2},
   {name:"青蛙",level:2,emoji:"🐸",baseSize:30,speed:4.4},
@@ -59,7 +73,6 @@ const levelData=[
   {name:"神龙",level:10,emoji:"🐲",baseSize:80,speed:6.0}
 ];
 
-// 游戏数据
 let game;
 let gameStarted=false;
 let moveX=0, moveY=0;
@@ -79,7 +92,6 @@ function initGame(){
   updateStatus();
 }
 
-// 摇杆逻辑
 const joystick=document.querySelector(".joystick");
 const dot=document.querySelector(".joystick_dot");
 let jx=0,jy=0;
@@ -127,14 +139,12 @@ document.addEventListener("touchend",()=>{
   updateJoystick();
 });
 
-// 开始游戏
 startBtn.addEventListener("click",()=>{
   startScreen.classList.add("hidden");
   gameStarted=true;
 });
 restartBtn.addEventListener("click",initGame);
 
-// 生成怪物（你要的难度）
 function spawnNPC(){
   if(game.npcs.length>=game.maxNPC)return;
   const pLevel=game.player.level;
@@ -164,7 +174,6 @@ function spawnNPC(){
 
 function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
 
-// 合成逻辑（完美版）
 function mergeAllFollowers(){
   const p=game.player;
   let merged=true;
@@ -199,7 +208,6 @@ function mergeAllFollowers(){
   }
 }
 
-// 碰撞
 function checkCollisions(){
   const p=game.player;
   const pi=levelData[p.level-1];
@@ -223,26 +231,21 @@ function checkCollisions(){
   }
 }
 
-// 更新
+// 更新 —— 灵敏度 0.5
 function update(){
   if(!gameStarted||game.gameOver||game.win)return;
   const p=game.player;
   const pi=levelData[p.level-1];
   
-  // ====================== 这里降低了灵敏度 ======================
-  // 原来速度 *2 → 现在 *0.8 （和野怪速度一致、超顺滑）
-  p.x += moveX * 0.8;
-  p.y += moveY * 0.8;
-  // ============================================================
+  // 你要的灵敏度：0.5
+  p.x += moveX * 0.5;
+  p.y += moveY * 0.5;
   
-  // 边界
   const r=pi.baseSize/2;
   p.x=Math.max(r,Math.min(canvas.width-r,p.x));
   p.y=Math.max(r,Math.min(canvas.height-r,p.y));
-  // 尾迹
   p.trail.unshift({x:p.x,y:p.y});
   if(p.trail.length>40)p.trail.pop();
-  // NPC移动
   game.npcs.forEach(n=>{
     n.x+=n.vx; n.y+=n.vy;
     if(n.x<0||n.x>canvas.width)n.vx*=-1;
@@ -253,7 +256,6 @@ function update(){
   updateStatus();
 }
 
-// 状态
 function updateStatus(){
   const p=game.player;
   const info=levelData[p.level-1];
@@ -263,7 +265,6 @@ function updateStatus(){
   statusText.textContent=`等级：${p.level} ${info.emoji}${info.name}｜跟班：${txt||"无"}`;
 }
 
-// 绘制
 function drawEmoji(obj,lv,scale=1){
   const d=levelData[lv-1];
   const size=d.baseSize*scale;
@@ -304,7 +305,6 @@ function draw(){
   }
 }
 
-// 主循环
 function loop(){update();draw();requestAnimationFrame(loop)}
 initGame();
 loop();
