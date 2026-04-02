@@ -1,295 +1,273 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <!-- 1. 手机适配视口 -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>召唤神龙 · 手机可玩</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: #0f1c2c;
-      color: #fff;
-      font-family: 'Microsoft YaHei', sans-serif;
-      padding: 10px;
-      cursor: default;
-    }
-    #status {
-      margin-bottom: 8px;
-      font-size: 16px;
-    }
-    canvas {
-      border: 2px solid #fff;
-      background: #87ceeb;
-      border-radius: 8px;
-      /* 2. 手机触摸不滚屏 */
-      touch-action: none;
-      cursor: none;
-      max-width: 100%;
-      height: auto;
-    }
-    #restartBtn {
-      margin-top: 12px;
-      padding: 10px 28px;
-      font-size: 16px;
-      background: #ffaa00;
-      border: none;
-      border-radius: 8px;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      display: none;
-    }
-    #restartBtn.show {
-      display: inline-block;
-    }
-    #startScreen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-    #startBtn {
-      padding: 14px 36px;
-      font-size: 20px;
-      background: #ffaa00;
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    #startScreen.hidden {
-      display: none;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>召唤神龙 · 手机摇杆全屏版</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#0f1c2c}
+body{display:flex;flex-direction:column;align-items:center;justify:center;font-family:Arial;color:#fff}
+#status{position:fixed;top:10px;left:10px;right:10px;text-align:center;font-size:16px;z-index:10}
+#game{display:block;width:100vw;height:100vh;touch-action:none}
+#restartBtn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);padding:12px 30px;font-size:18px;background:#ffaa00;border:none;border-radius:10px;z-index:20;display:none}
+#restartBtn.show{display:block}
+#startScreen{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:flex;flex-direction:column;align-items:center;justify:center;z-index:999}
+#startBtn{padding:16px 40px;font-size:22px;background:#ffaa00;border:none;border-radius:12px}
+#startScreen.hidden{display:none}
+
+/* 虚拟摇杆 */
+.joystick{position:fixed;left:30px;bottom:30px;width:100px;height:100px;background:rgba(255,255,255,0.2);border-radius:50%;z-index:50}
+.joystick_dot{position:absolute;left:50%;top:50%;width:40px;height:40px;background:rgba(255,255,255,0.6);border-radius:50%;transform:translate(-50%,-50%)}
+</style>
 </head>
+
 <body>
-
-<div id="status">等级：1（🐛蝌蚪）｜跟班：</div>
-<canvas id="game" width="800" height="600"></canvas>
+<div id="status">等级：1 🐛蝌蚪｜跟班：无</div>
+<canvas id="game"></canvas>
 <button id="restartBtn">重新开始</button>
-
-<div id="startScreen">
-  <h1>召唤神龙 🐲</h1>
-  <br>
-  <button id="startBtn">开始游戏</button>
-</div>
+<div id="startScreen"><h1>召唤神龙 🐲</h1><br><button id="startBtn">开始游戏</button></div>
+<div class="joystick"><div class="joystick_dot"></div></div>
 
 <script>
-const levelData = [
-  { name: '蝌蚪',   level: 1, emoji: '🐛', baseSize: 24, speed: 4.2 },
-  { name: '青蛙',   level: 2, emoji: '🐸', baseSize: 30, speed: 4.4 },
-  { name: '乌龟',   level: 3, emoji: '🐢', baseSize: 36, speed: 4.0 },
-  { name: '金鱼',   level: 4, emoji: '🐠', baseSize: 40, speed: 4.8 },
-  { name: '鲤鱼',   level: 5, emoji: '🐟', baseSize: 44, speed: 5.0 },
-  { name: '电鳗',   level: 6, emoji: '🐍', baseSize: 48, speed: 5.2 },
-  { name: '鲨鱼',   level: 7, emoji: '🦈', baseSize: 54, speed: 5.4 },
-  { name: '鲸鱼',   level: 8, emoji: '🐳', baseSize: 60, speed: 5.2 },
-  { name: '蛟龙',   level: 9, emoji: '🐉', baseSize: 68, speed: 5.6 },
-  { name: '神龙',  level: 10, emoji: '🐲', baseSize: 80, speed: 6.0 },
+const canvas=document.getElementById("game");
+const ctx=canvas.getContext("2d");
+const statusText=document.getElementById("status");
+const restartBtn=document.getElementById("restartBtn");
+const startScreen=document.getElementById("startScreen");
+const startBtn=document.getElementById("startBtn");
+
+// 全屏画布
+function resizeCanvas(){
+  canvas.width=document.documentElement.clientWidth;
+  canvas.height=document.documentElement.clientHeight;
+}
+window.addEventListener("resize",resizeCanvas);
+resizeCanvas();
+
+// 等级配置
+const levelData=[
+  {name:"蝌蚪",level:1,emoji:"🐛",baseSize:24,speed:4.2},
+  {name:"青蛙",level:2,emoji:"🐸",baseSize:30,speed:4.4},
+  {name:"乌龟",level:3,emoji:"🐢",baseSize:36,speed:4.0},
+  {name:"金鱼",level:4,emoji:"🐠",baseSize:40,speed:4.8},
+  {name:"鲤鱼",level:5,emoji:"🐟",baseSize:44,speed:5.0},
+  {name:"电鳗",level:6,emoji:"🐍",baseSize:48,speed:5.2},
+  {name:"鲨鱼",level:7,emoji:"🦈",baseSize:54,speed:5.4},
+  {name:"鲸鱼",level:8,emoji:"🐳",baseSize:60,speed:5.2},
+  {name:"蛟龙",level:9,emoji:"🐉",baseSize:68,speed:5.6},
+  {name:"神龙",level:10,emoji:"🐲",baseSize:80,speed:6.0}
 ];
 
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-const statusText = document.getElementById('status');
-const restartBtn = document.getElementById('restartBtn');
-const startScreen = document.getElementById('startScreen');
-const startBtn = document.getElementById('startBtn');
-
+// 游戏数据
 let game;
-let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
-let gameStarted = false;
+let gameStarted=false;
+let moveX=0, moveY=0;
 
-function initGame() {
-  game = {
-    player: { x: canvas.width/2, y: canvas.height/2, level: 1, followers: [], trail: [] },
-    npcs: [],
-    maxNPC: 36,
-    gameOver: false,
-    win: false
+function initGame(){
+  game={
+    player:{x:canvas.width/2,y:canvas.height/2,level:1,followers:[],trail:[]},
+    npcs:[],
+    maxNPC:36,
+    gameOver:false,
+    win:false
   };
-  restartBtn.classList.remove('show');
-  startScreen.classList.remove('hidden');
-  gameStarted = false;
+  restartBtn.classList.remove("show");
+  startScreen.classList.remove("hidden");
+  gameStarted=false;
+  moveX=0; moveY=0;
   updateStatus();
 }
 
-// 3. 鼠标 + 触摸 双端控制
-// 鼠标
-canvas.addEventListener('mousemove', e => {
-  const r = canvas.getBoundingClientRect();
-  mouse.x = e.clientX - r.left;
-  mouse.y = e.clientY - r.top;
-});
-// 触摸（手机）
-function handleTouch(e) {
-  e.preventDefault();
-  const r = canvas.getBoundingClientRect();
-  if (e.touches.length > 0) {
-    mouse.x = e.touches[0].clientX - r.left;
-    mouse.y = e.touches[0].clientY - r.top;
-  }
+// 摇杆逻辑
+const joystick=document.querySelector(".joystick");
+const dot=document.querySelector(".joystick_dot");
+let jx=0,jy=0;
+let dragging=false;
+
+function updateJoystick(){
+  dot.style.transform=`translate(-50%,-50%) translate(${jx*30}px,${jy*30}px)`;
 }
-canvas.addEventListener('touchstart', handleTouch);
-canvas.addEventListener('touchmove', handleTouch);
-canvas.addEventListener('touchend', handleTouch);
-canvas.addEventListener('touchcancel', handleTouch);
 
-startBtn.addEventListener('click', () => {
-  startScreen.classList.add('hidden');
-  gameStarted = true;
+joystick.addEventListener("touchstart",e=>{
+  e.preventDefault();
+  dragging=true;
+  const rect=joystick.getBoundingClientRect();
+  const cx=rect.left+rect.width/2;
+  const cy=rect.top+rect.height/2;
+  const tx=e.touches[0].clientX;
+  const ty=e.touches[0].clientY;
+  jx=(tx-cx)/(rect.width/2);
+  jy=(ty-cy)/(rect.height/2);
+  const d=Math.hypot(jx,jy);
+  if(d>1){jx/=d;jy/=d}
+  moveX=jx; moveY=jy;
+  updateJoystick();
 });
-restartBtn.addEventListener('click', initGame);
 
-// 难度：高级怪比例（你之前调好的）
-function spawnNPC() {
-  if (game.npcs.length >= game.maxNPC) return;
-  const pLevel = game.player.level;
-  const minLevel = Math.max(1, pLevel - 1);
-  const maxLevel = Math.min(pLevel + 3, 10);
-  let weightSum = 0;
-  const weights = [];
-  for (let lv = minLevel; lv <= maxLevel; lv++) {
-    const w = lv > pLevel ? 2 : 1;
-    weights.push({ lv, w });
-    weightSum += w;
+document.addEventListener("touchmove",e=>{
+  if(!dragging)return;
+  e.preventDefault();
+  const rect=joystick.getBoundingClientRect();
+  const cx=rect.left+rect.width/2;
+  const cy=rect.top+rect.height/2;
+  const tx=e.touches[0].clientX;
+  const ty=e.touches[0].clientY;
+  jx=(tx-cx)/(rect.width/2);
+  jy=(ty-cy)/(rect.height/2);
+  const d=Math.hypot(jx,jy);
+  if(d>1){jx/=d;jy/=d}
+  moveX=jx; moveY=jy;
+  updateJoystick();
+});
+
+document.addEventListener("touchend",()=>{
+  dragging=false;
+  jx=0;jy=0;moveX=0;moveY=0;
+  updateJoystick();
+});
+
+// 开始游戏
+startBtn.addEventListener("click",()=>{
+  startScreen.classList.add("hidden");
+  gameStarted=true;
+});
+restartBtn.addEventListener("click",initGame);
+
+// 生成怪物（你要的难度）
+function spawnNPC(){
+  if(game.npcs.length>=game.maxNPC)return;
+  const pLevel=game.player.level;
+  const minLevel=Math.max(1,pLevel-1);
+  const maxLevel=Math.min(pLevel+3,10);
+  let weightSum=0;
+  const weights=[];
+  for(let lv=minLevel;lv<=maxLevel;lv++){
+    const w=lv>pLevel?2:1;
+    weights.push({lv,w});
+    weightSum+=w;
   }
-  let r = Math.random() * weightSum;
-  let targetLevel = minLevel;
-  for (const item of weights) {
-    r -= item.w;
-    if (r <= 0) {
-      targetLevel = item.lv;
-      break;
-    }
+  let r=Math.random()*weightSum;
+  let targetLevel=minLevel;
+  for(const item of weights){
+    r-=item.w;
+    if(r<=0){targetLevel=item.lv;break}
   }
   game.npcs.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    level: targetLevel,
-    vx: (Math.random() - 0.5) * 1.4,
-    vy: (Math.random() - 0.5) * 1.4
+    x:Math.random()*canvas.width,
+    y:Math.random()*canvas.height,
+    level:targetLevel,
+    vx:(Math.random()-0.5)*1.4,
+    vy:(Math.random()-0.5)*1.4
   });
 }
 
-function dist(a,b) { return Math.hypot(a.x-b.x, a.y-b.y); }
-function mergeAllFollowers() {
-  const p = game.player;
-  let merged = true;
-  while (merged) {
-    merged = false;
-    const count = {};
-    p.followers.forEach(lev => count[lev] = (count[lev]||0)+1);
-    for (let lev=1; lev<=9; lev++) {
-      if (count[lev] >=3) {
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+
+// 合成逻辑（完美版）
+function mergeAllFollowers(){
+  const p=game.player;
+  let merged=true;
+  while(merged){
+    merged=false;
+    const count={};
+    p.followers.forEach(lev=>count[lev]=(count[lev]||0)+1);
+    for(let lev=1;lev<=9;lev++){
+      if(count[lev]>=3){
         let removed=0;
-        for (let i=p.followers.length-1; i>=0 && removed<3; i--) {
-          if (p.followers[i]===lev) {
-            p.followers.splice(i,1);
-            removed++;
-          }
+        for(let i=p.followers.length-1;i>=0&&removed<3;i--){
+          if(p.followers[i]===lev){p.followers.splice(i,1);removed++}
         }
         p.followers.push(lev+1);
-        merged = true;
+        merged=true;
         break;
       }
     }
   }
-  const same = p.followers.filter(l=>l===p.level).length;
-  if (same >=2) {
+  const same=game.player.followers.filter(l=>l===game.player.level).length;
+  if(same>=2){
     let removed=0;
-    for (let i=p.followers.length-1; i>=0 && removed<2; i--) {
-      if (p.followers[i]===p.level) {
-        p.followers.splice(i,1);
+    for(let i=game.player.followers.length-1;i>=0&&removed<2;i--){
+      if(game.player.followers[i]===game.player.level){
+        game.player.followers.splice(i,1);
         removed++;
       }
     }
-    p.level++;
-    if (p.level>=10) { game.win=true; restartBtn.classList.add('show'); }
+    game.player.level++;
+    if(game.player.level>=10){game.win=true;restartBtn.classList.add("show")}
     mergeAllFollowers();
   }
 }
 
-function checkCollisions() {
-  const p = game.player;
-  const pInfo = levelData[p.level-1];
-  for (let i=game.npcs.length-1; i>=0; i--) {
-    const npc = game.npcs[i];
-    const nInfo = levelData[npc.level-1];
-    const d = dist(p,npc);
-    const minD = pInfo.baseSize/2.5 + nInfo.baseSize/2.5;
-    if (d < minD) {
-      if (npc.level > p.level) {
-        p.level = Math.max(1, p.level-1);
-        p.followers = [];
-        if (p.level===1) {
-          game.gameOver=true;
-          restartBtn.classList.add('show');
-        }
+// 碰撞
+function checkCollisions(){
+  const p=game.player;
+  const pi=levelData[p.level-1];
+  for(let i=game.npcs.length-1;i>=0;i--){
+    const n=game.npcs[i];
+    const ni=levelData[n.level-1];
+    const d=dist(p,n);
+    const minD=(pi.baseSize+ni.baseSize)/4;
+    if(d<minD){
+      if(n.level>p.level){
+        p.level=Math.max(1,p.level-1);
+        p.followers=[];
+        if(p.level===1){game.gameOver=true;restartBtn.classList.add("show")}
         game.npcs.splice(i,1);
         return;
       }
       game.npcs.splice(i,1);
-      p.followers.push(npc.level);
+      p.followers.push(n.level);
       mergeAllFollowers();
     }
   }
 }
 
-function update() {
-  if (!gameStarted || game.gameOver || game.win) return;
-  const p = game.player;
-  const pInfo = levelData[p.level-1];
+// 更新
+function update(){
+  if(!gameStarted||game.gameOver||game.win)return;
+  const p=game.player;
+  const pi=levelData[p.level-1];
+  // 摇杆移动
+  const spd=pi.speed;
+  p.x+=moveX*spd*2;
+  p.y+=moveY*spd*2;
+  // 边界
+  const r=pi.baseSize/2;
+  p.x=Math.max(r,Math.min(canvas.width-r,p.x));
+  p.y=Math.max(r,Math.min(canvas.height-r,p.y));
+  // 尾迹
   p.trail.unshift({x:p.x,y:p.y});
-  if (p.trail.length>40) p.trail.pop();
-  const dx = mouse.x - p.x;
-  const dy = mouse.y - p.y;
-  const len = Math.hypot(dx,dy)+0.01;
-  p.x += dx/len * pInfo.speed;
-  p.y += dy/len * pInfo.speed;
-  const half = pInfo.baseSize/2;
-  p.x = Math.max(half, Math.min(canvas.width-half, p.x));
-  p.y = Math.max(half, Math.min(canvas.height-half, p.y));
+  if(p.trail.length>40)p.trail.pop();
+  // NPC移动
   game.npcs.forEach(n=>{
     n.x+=n.vx; n.y+=n.vy;
-    if (n.x<0||n.x>canvas.width) n.vx*=-1;
-    if (n.y<0||n.y>canvas.height) n.vy*=-1;
+    if(n.x<0||n.x>canvas.width)n.vx*=-1;
+    if(n.y<0||n.y>canvas.height)n.vy*=-1;
   });
   spawnNPC();
   checkCollisions();
   updateStatus();
 }
 
-function updateStatus() {
-  const p = game.player;
-  const info = levelData[p.level-1];
-  const sum = {};
+// 状态
+function updateStatus(){
+  const p=game.player;
+  const info=levelData[p.level-1];
+  const sum={};
   p.followers.forEach(lev=>sum[lev]=(sum[lev]||0)+1);
-  const txt = Object.entries(sum)
-    .map(([l,n])=>`${levelData[l-1].emoji}×${n}`)
-    .join(' ');
-  statusText.textContent = `等级：${p.level} ${info.emoji}${info.name}｜跟班：${txt||'无'}`;
+  const txt=Object.entries(sum).map(([l,n])=>`${levelData[l-1].emoji}×${n}`).join(" ");
+  statusText.textContent=`等级：${p.level} ${info.emoji}${info.name}｜跟班：${txt||"无"}`;
 }
 
-function drawEmoji(obj,level,scale=1){
-  const info=levelData[level-1];
-  const size=info.baseSize*scale;
+// 绘制
+function drawEmoji(obj,lv,scale=1){
+  const d=levelData[lv-1];
+  const size=d.baseSize*scale;
   ctx.font=`${size}px Arial`;
-  ctx.textAlign='center';
-  ctx.textBaseline='middle';
-  ctx.fillText(info.emoji,obj.x,obj.y);
+  ctx.textAlign="center";
+  ctx.textBaseline="middle";
+  ctx.fillText(d.emoji,obj.x,obj.y);
 }
 
 function drawFollowers(){
@@ -310,25 +288,21 @@ function draw(){
   drawFollowers();
   drawEmoji(game.player,game.player.level);
   if(game.win){
-    ctx.font='bold 52px Arial';
-    ctx.fillStyle='#ff0';
-    ctx.textAlign='center';
-    ctx.fillText('🎉 召唤神龙成功！',canvas.width/2,240);
+    ctx.font="bold 40px Arial";
+    ctx.fillStyle="#ff0";
+    ctx.textAlign="center";
+    ctx.fillText("🎉 召唤神龙成功！",canvas.width/2,canvas.height/2);
   }
   if(game.gameOver){
-    ctx.font='bold 52px Arial';
-    ctx.fillStyle='#f44';
-    ctx.textAlign='center';
-    ctx.fillText('💀 游戏结束',canvas.width/2,240);
+    ctx.font="bold 40px Arial";
+    ctx.fillStyle="#f44";
+    ctx.textAlign="center";
+    ctx.fillText("💀 游戏结束",canvas.width/2,canvas.height/2);
   }
 }
 
-function loop(){
-  update();
-  draw();
-  requestAnimationFrame(loop);
-}
-
+// 主循环
+function loop(){update();draw();requestAnimationFrame(loop)}
 initGame();
 loop();
 </script>
