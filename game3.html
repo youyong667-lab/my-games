@@ -228,10 +228,13 @@ function update(){
   if(!gameStarted||game.gameOver||game.win)return;
   const p=game.player;
   const pi=levelData[p.level-1];
-  // 摇杆移动
-  const spd=pi.speed;
-  p.x+=moveX*spd*2;
-  p.y+=moveY*spd*2;
+  
+  // ====================== 这里降低了灵敏度 ======================
+  // 原来速度 *2 → 现在 *0.8 （和野怪速度一致、超顺滑）
+  p.x += moveX * 0.8;
+  p.y += moveY * 0.8;
+  // ============================================================
+  
   // 边界
   const r=pi.baseSize/2;
   p.x=Math.max(r,Math.min(canvas.width-r,p.x));
