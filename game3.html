@@ -22,8 +22,8 @@ body{display:flex;flex-direction:column;align-items:center;justify:center;font-f
   left: 30%;
   transform: translateX(-50%);
   bottom: 30vh;    /* 屏幕高度 下1/3 */
-  width: 40vw;  /* 直径 = 屏幕宽度 1/5 */
-  height: 40vw;
+  width: 36vw;  /* 直径 = 屏幕宽度 1/5 */
+  height: 36vw;
   background:rgba(255,255,255,0.2);
   border-radius:30;
   z-index:50;
@@ -63,15 +63,15 @@ resizeCanvas();
 
 const levelData=[
   {name:"蝌蚪",level:1,emoji:"🐛",baseSize:50,speed:4.2},
-  {name:"青蛙",level:2,emoji:"🐸",baseSize:80,speed:4.4},
-  {name:"乌龟",level:3,emoji:"🐢",baseSize:110,speed:4.0},
-  {name:"金鱼",level:4,emoji:"🐠",baseSize:140,speed:4.8},
-  {name:"鲤鱼",level:5,emoji:"🐟",baseSize:170,speed:5.0},
-  {name:"电鳗",level:6,emoji:"🐍",baseSize:200,speed:5.2},
-  {name:"鲨鱼",level:7,emoji:"🦈",baseSize:230,speed:5.4},
-  {name:"鲸鱼",level:8,emoji:"🐳",baseSize:260,speed:5.2},
-  {name:"蛟龙",level:9,emoji:"🐉",baseSize:290,speed:5.6},
-  {name:"神龙",level:10,emoji:"🐲",baseSize:320,speed:6.0}
+  {name:"青蛙",level:2,emoji:"🐸",baseSize:65,speed:4.4},
+  {name:"乌龟",level:3,emoji:"🐢",baseSize:80,speed:4.0},
+  {name:"金鱼",level:4,emoji:"🐠",baseSize:95,speed:4.8},
+  {name:"鲤鱼",level:5,emoji:"🐟",baseSize:105,speed:5.0},
+  {name:"电鳗",level:6,emoji:"🐍",baseSize:115,speed:5.2},
+  {name:"鲨鱼",level:7,emoji:"🦈",baseSize:125,speed:5.4},
+  {name:"鲸鱼",level:8,emoji:"🐳",baseSize:135,speed:5.2},
+  {name:"蛟龙",level:9,emoji:"🐉",baseSize:145,speed:5.6},
+  {name:"神龙",level:10,emoji:"🐲",baseSize:155,speed:6.0}
 ];
 
 let game;
@@ -239,8 +239,8 @@ function update(){
   const pi=levelData[p.level-1];
   
   // 你要的灵敏度：0.5
-  p.x += moveX * 4;
-  p.y += moveY * 4;
+  p.x += moveX * 3;
+  p.y += moveY * 3;
   
   const r=pi.baseSize/2;
   p.x=Math.max(r,Math.min(canvas.width-r,p.x));
