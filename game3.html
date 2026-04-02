@@ -19,13 +19,13 @@ body{display:flex;flex-direction:column;align-items:center;justify:center;font-f
 /* 你要的：直径=屏幕宽度1/3 + 水平居中 + 垂直下1/3 */
 .joystick{
   position:fixed;
-  left: 50%;
+  left: 30%;
   transform: translateX(-50%);
-  bottom: 33vh;    /* 屏幕高度 下1/3 */
-  width: 33.33vw;  /* 直径 = 屏幕宽度 1/3 */
-  height: 33.33vw;
+  bottom: 20vh;    /* 屏幕高度 下1/3 */
+  width: 15vw;  /* 直径 = 屏幕宽度 1/5 */
+  height: 15vw;
   background:rgba(255,255,255,0.2);
-  border-radius:50%;
+  border-radius:30;
   z-index:50;
 }
 .joystick_dot{
@@ -239,8 +239,8 @@ function update(){
   const pi=levelData[p.level-1];
   
   // 你要的灵敏度：0.5
-  p.x += moveX * 0.5;
-  p.y += moveY * 0.5;
+  p.x += moveX * 0.7;
+  p.y += moveY * 0.7;
   
   const r=pi.baseSize/2;
   p.x=Math.max(r,Math.min(canvas.width-r,p.x));
