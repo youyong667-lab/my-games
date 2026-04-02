@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>游戏合集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 顶部切换按钮样式 */
+        .tab-container {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: #f5f5f5;
+        }
+
+        .tab-btn {
+            padding: 10px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #4285f4;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: #3367d6;
+        }
+
+        /* 游戏展示区域 */
+        .game-frame {
+            width: 100%;
+            height: calc(100vh - 60px); /* 占满屏幕剩余高度 */
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 切换按钮 -->
+    <div class="tab-container">
+        <button class="tab-btn" onclick="switchGame('game1.html')">随机惩罚</button>
+        <button class="tab-btn" onclick="switchGame('game2.html')">贪吃蛇</button>
+    </div>
+
+    <!-- 游戏显示区域 -->
+    <iframe id="gameDisplay" class="game-frame" src="game1.html"></iframe>
+
+    <script>
+        // 切换游戏函数
+        function switchGame(gameUrl) {
+            document.getElementById("gameDisplay").src = gameUrl;
+        }
+    </script>
+</body>
+</html>
