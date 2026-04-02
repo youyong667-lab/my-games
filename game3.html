@@ -22,8 +22,8 @@ body{display:flex;flex-direction:column;align-items:center;justify:center;font-f
   left: 30%;
   transform: translateX(-50%);
   bottom: 30vh;    /* 屏幕高度 下1/3 */
-  width: 30vw;  /* 直径 = 屏幕宽度 1/5 */
-  height: 30vw;
+  width: 40vw;  /* 直径 = 屏幕宽度 1/5 */
+  height: 40vw;
   background:rgba(255,255,255,0.2);
   border-radius:30;
   z-index:50;
@@ -239,8 +239,8 @@ function update(){
   const pi=levelData[p.level-1];
   
   // 你要的灵敏度：0.5
-  p.x += moveX * 3;
-  p.y += moveY * 3;
+  p.x += moveX * 4;
+  p.y += moveY * 4;
   
   const r=pi.baseSize/2;
   p.x=Math.max(r,Math.min(canvas.width-r,p.x));
